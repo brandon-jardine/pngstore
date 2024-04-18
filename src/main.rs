@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use std::io::{self, Read, Write};
 use std::fs;
 
@@ -7,10 +7,14 @@ mod decode;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
-struct Args {
+#[command(propagate_version(true))]
+struct Cli {
     #[command(subcommand)]
     mode: Modes,
+}
 
+#[derive(Args, Debug)]
+struct FileArgs {
     #[arg(short, long)]
     input_file: Option<String>,
 
@@ -23,44 +27,52 @@ enum Modes {
     Encode {
         #[arg(short, long, default_value_t = 128)]
         width: u32,
+
+        #[command(flatten)]
+        file_args: FileArgs,
     },
-    Decode,
+    Decode {
+        #[command(flatten)]
+        file_args: FileArgs,
+    },
 }
 
 pub fn main() {
-    let args = Args::parse();
-
-    let mut input: Vec<u8> = Vec::new();
-
-    match &args.input_file {
-        Some(file_name) => {
-            input = fs::read(file_name).unwrap();
-        },
-        None => {
-            let _ = io::stdin().read_to_end(&mut input);
-        }
-    }
-
-    let output: Vec<u8>;
+    let args = Cli::parse();
 
     match &args.mode {
-        Modes::Encode { width } => {
-            output = encode::encode(*width, &input); 
+        Modes::Encode { width, file_args } => {
+            let output = encode::encode(*width, &load_input(&file_args.input_file)); 
+            write_output(&file_args.output_file, &output);
         },
-        Modes::Decode => {
-            output = decode::decode(&input);
+        Modes::Decode { file_args } => {
+            let output = decode::decode(&load_input(&file_args.input_file));
+            write_output(&file_args.output_file, &output);
         },
     }
+}
 
-    match &args.output_file {
+fn load_input(file_name: &Option<String>) -> Vec<u8> {
+    match &file_name {
         Some(file_name) => {
-            let _ = fs::write(file_name, output);
+            fs::read(file_name).unwrap()
         },
         None => {
-            let _ = io::stdout().write(&output);
-        },
+            let mut contents = Vec::new();
+            let _ = io::stdin().read_to_end(&mut contents);
+            contents
+        }
     }
+}
 
-//    let _ = img.save(output_file);
+fn write_output(file_name: &Option<String>, contents: &Vec<u8>) {
+    match &file_name {
+        Some(name) => {
+            let _ = fs::write(name, contents).unwrap();
+        },
+        None => {
+            let _ = io::stdout().write(&contents).unwrap();
+        }
+    }
 }
 
