@@ -4,7 +4,9 @@ use image::{RgbaImage, Rgba, ImageFormat};
 use crate::{PIXEL_WIDTH, PIXEL_HEIGHT};
 
 pub fn encode(width: u32, input: &Vec<u8>) -> Vec<u8> {
-    let mut img = RgbaImage::new(width, calculate_image_height(width, input));
+    let height = calculate_image_height(width, input);
+
+    let mut img = RgbaImage::new(width, height);
 
     let mut x = 0;
     let mut y = 0;
@@ -59,6 +61,6 @@ pub fn encode(width: u32, input: &Vec<u8>) -> Vec<u8> {
 
 fn calculate_image_height(width: u32, data: &Vec<u8>) -> u32 {
     let size = u32::try_from(data.len()).unwrap();
-    (size % width) + 1
+    (size / width) + 1
 }
 
