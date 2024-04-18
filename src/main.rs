@@ -5,9 +5,6 @@ use std::fs;
 mod encode;
 mod decode;
 
-const PIXEL_HEIGHT: u32 = 1;
-const PIXEL_WIDTH: u32 = 1;
-
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {

@@ -1,8 +1,6 @@
 use std::io::{Cursor, Read};
 use image::{RgbaImage, Rgba, ImageFormat};
 
-use crate::{PIXEL_WIDTH, PIXEL_HEIGHT};
-
 pub fn encode(width: u32, input: &Vec<u8>) -> Vec<u8> {
     let height = calculate_image_height(width, input);
 
@@ -14,18 +12,11 @@ pub fn encode(width: u32, input: &Vec<u8>) -> Vec<u8> {
     for byte_chunk in input.chunks_exact(4) {
 
         let color = Rgba([byte_chunk[0], byte_chunk[1], byte_chunk[2], byte_chunk[3]]);
-
-        for sub_y in y..y+PIXEL_HEIGHT {
-            for sub_x in x..x+PIXEL_WIDTH {
-                img.put_pixel(sub_x, sub_y, color);
-            }
-        }
-
-        x += PIXEL_WIDTH;
+        x += 1;
 
         if x >= width {
             x = 0;
-            y += PIXEL_HEIGHT;
+            y += 1;
         }
 
         img.put_pixel(x, y, color);
