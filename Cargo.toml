@@ -2,6 +2,9 @@
 name = "pngstore"
 version = "0.1.0"
 edition = "2021"
+authors = ["Brandon T Jardine"]
+readme = "README.md"
+license = "GPL-3.0-or-later"
 
 [profile.release]
 lto = true
